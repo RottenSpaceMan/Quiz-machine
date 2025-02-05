@@ -13,13 +13,13 @@ class TeamInputDialog(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Enter Number of Teams")
-        self.geometry("300x200")
+        self.geometry("1280x720")
         self.parent = parent
 
         self.label = ttk.Label(self, text="Number of Teams:")
         self.label.pack(pady=10)
 
-        self.team_count_var = tk.IntVar(value=3)
+        self.team_count_var = tk.IntVar(value=4)
         self.entry = ttk.Entry(self, textvariable=self.team_count_var)
         self.entry.pack(pady=5)
 
@@ -31,11 +31,49 @@ class TeamInputDialog(tk.Toplevel):
         self.destroy()
         self.parent.show_student_assignment()
 
+# class StudentAssignmentDialog(tk.Toplevel):
+#     def __init__(self, parent):
+#         super().__init__(parent)
+#         self.title("Assign Students to Teams")
+#         self.geometry("1080x720")
+#         self.parent = parent
+
+#         self.team_vars = {}
+#         self.student_team = {}
+
+#         self.label = ttk.Label(self, text="Assign each student to a team:")
+#         self.label.pack(pady=10)
+
+#         self.student_frame = ttk.Frame(self)
+#         self.student_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+#         for student_id, student_name in students.items():
+#             frame = ttk.Frame(self.student_frame)
+#             frame.pack(fill="x", pady=5)
+
+#             label = ttk.Label(frame, text=student_name)
+#             label.pack(side="left", padx=5)
+
+#             team_var = tk.StringVar(value="None")
+#             self.team_vars[student_id] = team_var
+
+#             options = ["None"] + [f"Team {i+1}" for i in range(self.parent.num_teams)]
+#             dropdown = ttk.OptionMenu(frame, team_var, *options)
+#             dropdown.pack(side="right", padx=5)
+
+#         self.confirm_button = ttk.Button(self, text="Confirm", command=self.on_confirm)
+#         self.confirm_button.pack(pady=10)
+
+#     def on_confirm(self):
+#         self.parent.student_team = {student_id: var.get() for student_id, var in self.team_vars.items() if var.get() != "None"}
+#         self.destroy()
+#         self.parent.create_quiz_app()
+
 class StudentAssignmentDialog(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Assign Students to Teams")
-        self.geometry("400x300")
+        self.geometry("1080x720")
         self.parent = parent
 
         self.team_vars = {}
@@ -47,8 +85,26 @@ class StudentAssignmentDialog(tk.Toplevel):
         self.student_frame = ttk.Frame(self)
         self.student_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
+        # Adding a canvas and scrollbar
+        self.canvas = tk.Canvas(self.student_frame)
+        self.scrollbar = ttk.Scrollbar(self.student_frame, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
         for student_id, student_name in students.items():
-            frame = ttk.Frame(self.student_frame)
+            frame = ttk.Frame(self.scrollable_frame)
             frame.pack(fill="x", pady=5)
 
             label = ttk.Label(frame, text=student_name)
@@ -66,13 +122,12 @@ class StudentAssignmentDialog(tk.Toplevel):
 
     def on_confirm(self):
         self.parent.student_team = {student_id: var.get() for student_id, var in self.team_vars.items() if var.get() != "None"}
-        self.destroy()
-        self.parent.create_quiz_app()
+        self
 
 class QuizApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.num_teams = 3  # Default number of teams
+        self.num_teams = 4  # Default number of teams
         self.student_team = {}
         self.withdraw()  # Hide the main window initially
         self.team_input_dialog = TeamInputDialog(self)
