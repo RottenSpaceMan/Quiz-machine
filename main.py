@@ -2,12 +2,26 @@ import tkinter as tk
 from tkinter import ttk
 import random
 import json
+import os
+import sys
+
+# Determine the directory of the executable
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the paths to the JSON files
+students_file = os.path.join(application_path, "students.json")
+questions_file = os.path.join(application_path, "questions.json")
 
 # Loading from JSON
-with open("students.json") as f:
+with open(students_file, encoding='utf-8') as f:
     students = json.load(f)
-with open("questions.json") as f:
+with open(questions_file, encoding='utf-8') as f:
     quiz_questions = json.load(f)
+
+# ... rest of your code ...
 
 class TeamInputDialog(tk.Toplevel):
     def __init__(self, parent):
